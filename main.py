@@ -1,68 +1,41 @@
-import pymysql
-import requests
+from flask import Flask
+from datetime import datetime
 
-table_str = """
-create table if not exists pm25(
-    id int auto_increment primary key,
-    site varchar(25),
-    county varchar(25),
-    pm25 int,
-    datacreationdate datetime,
-    itemunit varchar(20),
-    unique key site_time (site, datacreationdate)
-)
-"""
-sqlstr = "insert ignore into pm25(site,county,pm25,datacreationdate,itemunit)\
- values(%s, %s, %s, %s, %s)"
-
-url = "https://data.moenv.gov.tw/api/v2/aqx_p_02?api_key=af57253c-e838-46da-a1f5-12b43afd75f3&limit=1000&sort=datacreationdate%20desc&format=JSON"
-
-conn, cursor = None, None
+app = Flask(__name__)
 
 
-def open_db():
-    global conn, cursor
+@app.route("/")
+def index():
+    return "<h1>Hello, World!</h1>"
+
+
+@app.route("/nowtime")
+def now_time():
+    now = datetime.now()
+    # print(now)
+    return now.strftime("%Y-%m-%d %H:%M:%S")
+
+
+@app.route("/books")
+@app.route("/books/id=<int:id>")
+def get_books(id=None):
     try:
-        conn = pymysql.connect(
-            host="127.0.0.1",
-            user="root",
-            passwd="",
-            port=3307,
-            db="demo",
-        )
-        # print(conn)
-        print("資料庫開啟成功")
-        cursor = conn.cursor()
+        books = {1: "Python book", 2: "Java book", 3: "C++ book"}
+        if id is None:
+            return books
+        else:
+            return books[id]
     except Exception as e:
-        print(e)
+        return f"書籍編號錯誤:{e}"
 
 
-def close_db():
-    if conn is not None:
-        conn.close()
-        print("資料庫關閉成功!")
-
-
-def get_open_data():
-    res = requests.get(url, verify=False)
-    datas = res.json()
-    values = [list(data.values()) for data in datas if list(data.values())[2] != ""]
-    return values
-
-
-def write_to_sql():
+@app.route("/bmi/height=<h>&weight=<w>")
+def get_bmi(h, w):
     try:
-        values = get_open_data()
-        if len(values) == 0:
-            print("目前無資料")
-            return
-        size = cursor.executemany(sqlstr, values)
-        conn.commit()
-        print(f"寫入{size}筆資料成功!")
+        bmi = round((eval(w) / (eval(h) / 100) ** 2), 2)
+        return f"<h1>身高:{h}m,體重:{w}kg,BMI值為:{bmi}</h1>"
     except Exception as e:
-        print(e)
+        return f"身高或體重輸入錯誤:{e}"
 
 
-open_db()
-write_to_sql()
-close_db()
+app.run(debug=True)
