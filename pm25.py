@@ -24,15 +24,17 @@ def open_db():
     global conn, cursor
     try:
         conn = pymysql.connect(
-            host="127.0.0.1",
-            user="root",
-            passwd="",
-            port=3307,
-            db="demo",
+            host="mysql-3650ed2-pm25.e.aivencloud.com",
+            user="avnadmin",
+            passwd="AVNS_-hDOnmEfwqkcZfFy7WF",
+            port=21697,
+            db="defaultdb",
         )
         # print(conn)
         print("資料庫開啟成功")
         cursor = conn.cursor()
+        cursor.execute(table_str)
+        conn.commit()
     except Exception as e:
         print(e)
 
@@ -59,10 +61,73 @@ def write_to_sql():
         size = cursor.executemany(sqlstr, values)
         conn.commit()
         print(f"寫入{size}筆資料成功!")
+        return size
+    except Exception as e:
+        print(e)
+    return 0
+
+
+def write_data_to_mysql():
+    try:
+        open_db()
+        size = write_to_sql()
+
+        return {"結果": "success", "寫入筆數": size}
     except Exception as e:
         print(e)
 
+        return {"結果": "failure", "message": str(e)}
+    finally:
+        close_db()
 
-open_db()
-write_to_sql()
-close_db()
+
+def get_data_from_mysql():
+    try:
+        open_db()
+        # sqlstr = "select max(datacreationdate) from pm25"
+        # cursor.execute(sqlstr)
+        # result = cursor.fetchone()
+        # print(result)
+        # print(type(result))
+        # if result:
+        #     max_date = result[0]
+
+        sqlstr = (
+            "select site,county,pm25,datacreationdate,itemunit "
+            "from pm25 "
+            "where datacreationdate=(select max(datacreationdate) from pm25);"
+        )
+        cursor.execute(sqlstr)
+        datas = cursor.fetchall()
+
+        return datas
+    except Exception as e:
+        print(e)
+    finally:
+        close_db()
+
+    return None
+
+
+def get_avg_from_mysql():
+    try:
+        open_db()
+
+        sqlstr = "select county,round(avg(pm25),2) from pm25 group by county;"
+        cursor.execute(sqlstr)
+        datas = cursor.fetchall()
+
+        return datas
+    except Exception as e:
+        print(e)
+    finally:
+        close_db()
+
+    return None
+
+
+# print(get_fata_from_mysql())
+
+if __name__ == "__main__":
+    write_data_to_mysql()
+    print(get_avg_from_mysql())
