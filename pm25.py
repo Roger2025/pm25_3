@@ -1,5 +1,9 @@
 import pymysql
 import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 table_str = """
 create table if not exists pm25(
@@ -26,7 +30,7 @@ def open_db():
         conn = pymysql.connect(
             host="mysql-3650ed2-pm25.e.aivencloud.com",
             user="avnadmin",
-            passwd="AVNS_-hDOnmEfwqkcZfFy7WF",
+            passwd=os.getenv("DB_PASSWORD"),
             port=21697,
             db="defaultdb",
         )

@@ -3,6 +3,7 @@ from datetime import datetime
 from pm25 import get_data_from_mysql, write_data_to_mysql, get_avg_pm25_from_mysql
 import json
 
+
 books = {
     1: {
         "name": "Python book",
