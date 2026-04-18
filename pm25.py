@@ -109,7 +109,7 @@ def get_data_from_mysql():
     return None
 
 
-def get_avg_from_mysql():
+def get_avg_pm25_from_mysql():
     try:
         open_db()
 
@@ -130,4 +130,4 @@ def get_avg_from_mysql():
 
 if __name__ == "__main__":
     write_data_to_mysql()
-    print(get_avg_from_mysql())
+    print(get_avg_pm25_from_mysql())
