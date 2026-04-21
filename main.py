@@ -1,6 +1,11 @@
 from flask import Flask, render_template, Response
 from datetime import datetime
-from pm25 import get_data_from_mysql, write_data_to_mysql, get_avg_pm25_from_mysql
+from pm25 import (
+    get_data_from_mysql,
+    write_data_to_mysql,
+    get_avg_pm25_from_mysql,
+    get_pm25_by_county,
+)
 import json
 
 
@@ -80,6 +85,40 @@ def get_avg_pm25():
     pm25 = [float(r[1]) for r in result]
     return Response(
         json.dumps({"county": county, "pm25": pm25}, ensure_ascii=False),
+        mimetype="application/json",
+    )
+
+
+@app.route("/county-pm25/<county>")
+def get_county_pm25(county):
+    result = get_pm25_by_county(county)
+
+    if len(result) == 0:
+        return Response(
+            json.dumps(
+                {
+                    "result": "取得資料失敗",
+                    "message": f"無此{county}縣市資料",
+                },
+                ensure_ascii=False,
+            )
+        )
+    site = [r[0] for r in result]
+    pm25 = [float(r[1]) for r in result]
+    datetime = result[0][2].strftime("%Y-%m-%d %H:%M:%S")
+    print(datetime)
+
+    return Response(
+        json.dumps(
+            {
+                "county": county,
+                "count": len(site),
+                "datetime": datetime,
+                "site": site,
+                "pm25": pm25,
+            },
+            ensure_ascii=False,
+        ),
         mimetype="application/json",
     )
 
