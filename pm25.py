@@ -109,7 +109,13 @@ def get_data_from_mysql():
         cursor.execute(sqlstr)
         countys = [county[0] for county in cursor.fetchall()]
 
-        return datas, countys
+        # 取得最新時間
+        sqlstr = "select max(datacreationdate) from pm25;"
+        cursor.execute(sqlstr)
+        max_date = cursor.fetchone()[0].strftime("%Y-%m-%d %H:%M:%S")
+        print(max_date)
+
+        return datas, countys, max_date
     except Exception as e:
         print(e)
     finally:
