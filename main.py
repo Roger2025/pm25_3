@@ -30,7 +30,6 @@ books = {
 app = Flask(__name__)
 
 
-@app.route("/")
 def index():
     time = now_time()
     return render_template("index.html", time=time, name="Roger")
@@ -63,6 +62,7 @@ def get_bmi(h, w):
         return f"身高或體重輸入錯誤:{e}"
 
 
+@app.route("/")
 @app.route("/pm25")
 def get_pm25():
     values, countys, max_date = get_data_from_mysql()
@@ -125,4 +125,5 @@ def get_county_pm25(county):
     )
 
 
-app.run(debug=True)
+if __name__ == "__main__":
+    app.run(debug=False)
