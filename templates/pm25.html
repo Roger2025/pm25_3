@@ -104,7 +104,8 @@
         }
     }
 
-    #main {
+    #main,
+    #county {
         margin: 0 auto;
     }
 </style>
@@ -113,6 +114,17 @@
     <h1>pm25數據列表</h1>
     <a href="/update-db">更新資料庫</a>
     <div id="main" style="width: 800px;height:400px;"></div>
+    <div id="county" style="width: 800px;height:400px;" hidden></div>
+    <div style="margin: 12px;">
+        <label for="countySelect">選擇縣市</label>
+        <select name="countySelect" id="countySelect">
+            <option value="新北市">新北市</option>
+            <option value="臺北市">臺北市</option>
+            <option value="臺中市">臺中市</option>
+        </select>
+        <button id="loadContainer" onclick="drawCountyChart()">確定</button>
+    </div>
+
     <div id="tableContainer">
         <table border="1">
             <thead>
@@ -137,44 +149,59 @@
 <script type="text/javascript">
 
     // 基于准备好的dom，初始化echarts实例
-    var myChart = echarts.init(document.getElementById('main'));
+    const chart1 = echarts.init(document.getElementById('main'));
+    const chart2 = echarts.init(document.getElementById('county'));
+    const countyEl = document.getElementById('county')
+    const countySelectEl = document.querySelector("#countySelect");
+    console.log(countySelectEl)
+
+    drawChart(chart1, "/avg-pm25", "各縣市PM2.5平均值", "county", "pm25", "blue");
 
 
-    $.ajax(
+    function drawCountyChart() {
+        let county = countySelectEl.value;
+        countyEl.hidden = false;
+        console.log(county);
+        drawChart(chart2, `/county-pm25/${county}`, `${county}PM2.5數據圖`, "site", "pm25", "red");
+    }
 
-        {
-            url: "avg-pm25",
-            type: "GET",
-            dataType: "json",
-            success: (result) => {
-                // 指定图表的配置项和数据
-                var option = {
-                    title: {
-                        text: '縣市PM2.5平均值'
-                    },
-                    tooltip: {},
-                    legend: {
-                        data: ['pm2.5']
-                    },
-                    xAxis: {
-                        data: result["county"]
-                    },
-                    yAxis: {},
-                    series: [
-                        {
-                            name: 'pm2.5',
-                            type: 'bar',
-                            data: result["pm25"]
-                        }
-                    ]
-                };
-
-                // 使用刚指定的配置项和数据显示图表。
-                myChart.setOption(option);
-            },
-        }
-    );
-
+    function drawChart(chart, url, title, xkey, ykey, color) {
+        $.ajax(
+            {
+                url: url,
+                type: "GET",
+                dataType: "json",
+                success: (result) => {
+                    // 指定图表的配置项和数据
+                    var option = {
+                        title: {
+                            text: `${title}`
+                        },
+                        tooltip: {},
+                        legend: {
+                            data: ['pm2.5']
+                        },
+                        xAxis: {
+                            data: result[xkey]
+                        },
+                        yAxis: {},
+                        series: [
+                            {
+                                itemStyle: {
+                                    color: color
+                                },
+                                name: 'pm2.5',
+                                type: 'bar',
+                                data: result[ykey]
+                            }
+                        ]
+                    };
+                    // 使用刚指定的配置项和数据显示图表。
+                    chart.setOption(option);
+                },
+            }
+        );
+    }
 
 
 </script>
