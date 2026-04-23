@@ -65,10 +65,10 @@ def get_bmi(h, w):
 
 @app.route("/pm25")
 def get_pm25():
-    values = get_data_from_mysql()
-    print(values)
+    values, countys = get_data_from_mysql()
+    print(values, countys)
     columns = ["站點名稱", "縣市", "PM2.5", "更新時間", "單位"]
-    return render_template("pm25.html", values=values, columns=columns)
+    return render_template("pm25.html", values=values, columns=columns, countys=countys)
 
 
 @app.route("/update-db")

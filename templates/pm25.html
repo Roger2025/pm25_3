@@ -118,9 +118,9 @@
     <div style="margin: 12px;">
         <label for="countySelect">選擇縣市</label>
         <select name="countySelect" id="countySelect">
-            <option value="新北市">新北市</option>
-            <option value="臺北市">臺北市</option>
-            <option value="臺中市">臺中市</option>
+            {% for county in countys %}
+            <option value="{{county}}">{{county}}</option>
+            {% endfor %}
         </select>
         <button id="loadContainer" onclick="drawCountyChart()">確定</button>
     </div>
